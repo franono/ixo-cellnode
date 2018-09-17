@@ -1,8 +1,9 @@
 import { Document, Schema, Model, model } from "mongoose";
 import { AbstractHandler } from './AbstractHandler';
 import { Request } from "../handlers/Request";
-import axios from 'axios';
 import InitHandler from './InitHandler';
+
+import walletService from '../service/WalletService';
 
 const BLOCKCHAIN_URI_REST = (process.env.BLOCKCHAIN_URI_REST || '');
 
@@ -159,19 +160,24 @@ export class RequestHandler extends AbstractHandler {
       switch (methodCall) {
         case 'CreateProject': {
           delete obj.autoApprove;
-          blockChainPayload = {
-            payload: [16, {
-              data: {
-                ...obj,
-                createdOn: request.signature.created,
-                createdBy: request.signature.creator
-              },
-              txHash: txHash,
-              senderDid: request.signature.creator,
-              projectDid: request.projectDid,
-              pubKey: this.getWallet().verifyKey
-            }]
-          }
+          walletService.getWallet(request.projectDid)
+            .then((wallet) => {
+              let data = {
+                data: {
+                  ...obj,
+                  createdOn: request.signature.created,
+                  createdBy: request.signature.creator
+                },
+                txHash: txHash,
+                senderDid: request.signature.creator,
+                projectDid: request.projectDid,
+                pubKey: wallet.verifyKey
+              }
+              blockChainPayload = {
+                payload: [16, new Buffer(JSON.stringify(data)).toString('hex').toUpperCase()]
+              }
+              resolve(this.signMessageForBlockchain(blockChainPayload, request.projectDid));
+            })
           break;
         }
         case 'CreateAgent': {
@@ -186,6 +192,7 @@ export class RequestHandler extends AbstractHandler {
               projectDid: request.projectDid
             }]
           }
+          resolve(this.signMessageForBlockchain(blockChainPayload, request.projectDid));
           break;
         }
         case 'UpdateAgentStatus': {
@@ -201,7 +208,7 @@ export class RequestHandler extends AbstractHandler {
               projectDid: request.projectDid
             }]
           }
-
+          resolve(this.signMessageForBlockchain(blockChainPayload, request.projectDid));
           break;
         }
         case 'SubmitClaim': {
@@ -215,6 +222,7 @@ export class RequestHandler extends AbstractHandler {
               projectDid: request.projectDid
             }]
           }
+          resolve(this.signMessageForBlockchain(blockChainPayload, request.projectDid));
           break;
         }
         case 'EvaluateClaim': {
@@ -229,19 +237,18 @@ export class RequestHandler extends AbstractHandler {
               projectDid: request.projectDid
             }]
           }
-
+          resolve(this.signMessageForBlockchain(blockChainPayload, request.projectDid));
           break;
         }
         default: {
           reject('Capability does not exist')
           break;
         }
-      }
-      resolve(this.signMessageForBlockchain(blockChainPayload, request.projectDid));
+      }      
     });
   }
 
-  checkKycCredentials = (didDoc: any): boolean  => {
+  checkKycCredentials = (didDoc: any): boolean => {
     if (didDoc.credentials) {
       didDoc.credentials.forEach((element: any) => {
         if (element.credential.claim.KYCValidated === true) {

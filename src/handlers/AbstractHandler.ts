@@ -21,8 +21,6 @@ import { AxiosResponse } from "axios";
 
 import Cache from '../Cache';
 
-var wallet: IWalletModel;
-
 export abstract class AbstractHandler {
 
   public createTransaction(args: any, method: string, model: Model<any>, checkIfExist?: Function, projectDid?: string) {
@@ -233,8 +231,7 @@ export abstract class AbstractHandler {
       var sovrinWallet = sovrinUtils.generateSdidFromMnemonic(mnemonic);
       var did = String("did:ixo:" + sovrinWallet.did);
       walletService.createWallet(did, sovrinWallet.secret.signKey, sovrinWallet.verifyKey)
-        .then((resp: IWalletModel) => {
-          wallet = resp;
+        .then((wallet: IWalletModel) => {
           Cache.set(wallet.did, { publicKey: wallet.verifyKey });
           console.log(new Date().getUTCMilliseconds() + ' project wallet created');
           resolve(wallet.did);
@@ -245,10 +242,6 @@ export abstract class AbstractHandler {
   abstract updateCapabilities(request: Request, methodCall: string): void;
 
   abstract msgToPublish(obj: any, request: Request, methodCall: string): any;
-
-  getWallet(): IWalletModel {
-    return wallet;
-  }
 
   signMessageForBlockchain(msgToSign: any, projectDid: string) {
     return new Promise((resolve: Function, reject: Function) => {
