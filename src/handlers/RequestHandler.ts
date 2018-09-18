@@ -151,7 +151,6 @@ export class RequestHandler extends AbstractHandler {
 
   msgToPublish(obj: any, request: Request, methodCall: string): any {
     return new Promise((resolve: Function, reject: Function) => {
-      var blockChainPayload: any;
       var txHash = obj.txHash;
       delete obj.version;
       delete obj.txHash;
@@ -162,26 +161,25 @@ export class RequestHandler extends AbstractHandler {
           delete obj.autoApprove;
           walletService.getWallet(request.projectDid)
             .then((wallet) => {
-              let data = {
-                data: {
-                  ...obj,
-                  createdOn: request.signature.created,
-                  createdBy: request.signature.creator
-                },
-                txHash: txHash,
-                senderDid: request.signature.creator,
-                projectDid: request.projectDid,
-                pubKey: wallet.verifyKey
-              }
-              blockChainPayload = {
-                payload: [16, new Buffer(JSON.stringify(data)).toString('hex').toUpperCase()]
+              let blockChainPayload = {
+                payload: [16, {
+                  data: {
+                    ...obj,
+                    createdOn: request.signature.created,
+                    createdBy: request.signature.creator
+                  },
+                  txHash: txHash,
+                  senderDid: request.signature.creator,
+                  projectDid: request.projectDid,
+                  pubKey: wallet.verifyKey
+                }]
               }
               resolve(this.signMessageForBlockchain(blockChainPayload, request.projectDid));
             })
           break;
         }
         case 'CreateAgent': {
-          blockChainPayload = {
+          let blockChainPayload = {
             payload: [17, {
               data: {
                 did: obj.agentDid,
@@ -196,7 +194,7 @@ export class RequestHandler extends AbstractHandler {
           break;
         }
         case 'UpdateAgentStatus': {
-          blockChainPayload = {
+          let blockChainPayload = {
             payload: [18, {
               data: {
                 did: obj.agentDid,
@@ -212,7 +210,7 @@ export class RequestHandler extends AbstractHandler {
           break;
         }
         case 'SubmitClaim': {
-          blockChainPayload = {
+          let blockChainPayload = {
             payload: [19, {
               data: {
                 claimID: txHash
@@ -226,7 +224,7 @@ export class RequestHandler extends AbstractHandler {
           break;
         }
         case 'EvaluateClaim': {
-          blockChainPayload = {
+          let blockChainPayload = {
             payload: [20, {
               data: {
                 claimID: obj.claimId,
@@ -244,7 +242,7 @@ export class RequestHandler extends AbstractHandler {
           reject('Capability does not exist')
           break;
         }
-      }      
+      }
     });
   }
 
