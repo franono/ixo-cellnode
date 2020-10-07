@@ -8,33 +8,15 @@ echo ""
 CURRENT_DIR=`dirname $0`
 ROOT_DIR=$CURRENT_DIR/..
 
-# if the environment cannot provide the type try to get it from the script argument
-if [ -z "$TARGET_ENVIRONMENT" ];
-then
-  TARGET_ENVIRONMENT=$1
-fi
-
-if [ -z "$TARGET_ENVIRONMENT" ];
-then
-    echo 'UNKNOWN TARGET ENVIRONMENT (dev, qa, uat or prod)'
-    exit
-fi
+TARGET_ENVIRONMENT="prod"
 
 # prepare parameters from the AWS Parameter Store
-password=`aws ssm get-parameter --name "DB_PASSWORD" --with-decryption --query Parameter.Value`
-export DB_PASSWORD="${password//\"}"
-export MQ_PASSWORD="${password//\"}"
-export ROOTPASS="${password//\"}"
-userdb=`aws ssm get-parameter --name "DB_USER" --with-decryption --query Parameter.Value`
-export DB_USER="${userdb//\"}"
-usermq=`aws ssm get-parameter --name "MQ_USER" --with-decryption --query Parameter.Value`
-export MQ_USER="${usermq//\"}"
-cipher=`aws ssm get-parameter --name "ASYMCYPHER" --with-decryption --query Parameter.Value`
-export ASYMCYPHER="${cipher//\"}"
-cipherkey=`aws ssm get-parameter --name "ASYMKEY" --with-decryption --query Parameter.Value`
-export ASYMKEY="${cipherkey//\"}"
-admin=`aws ssm get-parameter --name "ROOT" --with-decryption --query Parameter.Value`
-export ROOT="${admin//\"}"
+export DB_USER="relayer"
+export DB_PASSWORD="<new mongodb password>"
+export MQ_USER="relayer"
+export MQ_PASSWORD="<new RabbbitMQ password>"
+export ASYMCYPHER="<add a random string here for Wallet encryption>"
+export ASYMKEY="<add a random string here for Wallet encryption>"
 
 dbadmin="$ROOT_DIR/dbadmin"
 echo "Check if ${dbadmin} dir present"
