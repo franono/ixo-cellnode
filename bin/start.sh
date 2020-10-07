@@ -18,6 +18,11 @@ export MQ_PASSWORD="<new RabbbitMQ password>"
 export ASYMCYPHER="<add a random string here for Wallet encryption>"
 export ASYMKEY="<add a random string here for Wallet encryption>"
 
+export BLOCKCHAIN_URI_REST="http://<blocksync IP>/api/did/getByDid/"
+export BLOCKSYNC_URI_REST="http://<blocksync IP>/api/"
+export BLOCKCHAIN_REST="http://<REST server IP>:1317"
+export NODEDID="<DID of Relayer>"
+
 dbadmin="$ROOT_DIR/dbadmin"
 echo "Check if ${dbadmin} dir present"
 echo "Does ${dbadmin} exist? "
