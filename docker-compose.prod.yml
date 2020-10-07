@@ -4,11 +4,11 @@ services:
     environment:
       - MONGODB_URI=mongodb://${DB_USER}:${DB_PASSWORD}@db:27017/elysian
       - RABITMQ_URI=amqp://${MQ_USER}:${MQ_PASSWORD}@mq:5672?heartbeat=2
-      - BLOCKSYNC_URI_REST=
+      - BLOCKSYNC_URI_REST=${BLOCKSYNC_URI_REST}
       - ETHEREUM_API=https://mainnet.infura.io/
       - ASYM_CYPHER=${ASYMCYPHER}
       - ASYM_KEY=${ASYMKEY}
-      - NODEDID=
+      - NODEDID=${NODEDID}
 
   mq:
     ports:
@@ -20,9 +20,9 @@ services:
   pol:
     environment:
       - RABITMQ_URI=amqp://${MQ_USER}:${MQ_PASSWORD}@mq:5672?heartbeat=2
-      - BLOCKCHAIN_REST=
+      - BLOCKCHAIN_REST=${BLOCKCHAIN_REST}
 
   cli:
     environment:
       - MONGODB_URI=mongodb://${DB_USER}:${DB_PASSWORD}@db:27017/elysian
-      - BLOCKCHAIN_URI_REST=
+      - BLOCKCHAIN_URI_REST=${BLOCKCHAIN_URI_REST}
